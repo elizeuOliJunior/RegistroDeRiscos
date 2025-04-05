@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "2929623575",
+    "project_id": "registroderiscos",
+    "storage_bucket": "registroderiscos.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:2929623575:android:7863339bc004abfdfc1252",
+        "android_client_info": {
+          "package_name": "com.elizgoj.registroderiscos"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgBhsmavi0ySWm3QI2Mm1DzN7e9qMAQnE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
