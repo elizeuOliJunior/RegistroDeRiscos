@@ -1,4 +1,6 @@
 package com.example.registroderiscos.data.model
 
-class Risk {
-}
+data class Risk(
+    val id: String = "",
+    val description: String = ""
+)
