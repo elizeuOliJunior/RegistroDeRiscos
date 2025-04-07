@@ -1,3 +1,4 @@
+// data/repository/FirebaseRepository.kt
 package com.example.registroderiscos.repository
 
 import com.example.registroderiscos.data.model.Risk
@@ -23,7 +24,11 @@ class FirebaseRepository {
 
     suspend fun addRisk(risk: Risk): Result<Unit> {
         return try {
-            risksCollection.add(risk).await()
+            val riskMap = hashMapOf(
+                "description" to risk.description,
+                "address" to risk.address
+            )
+            risksCollection.add(riskMap).await()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

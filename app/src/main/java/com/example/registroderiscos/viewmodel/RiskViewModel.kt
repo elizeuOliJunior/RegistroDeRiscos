@@ -1,5 +1,9 @@
+// viewmodel/RiskViewModel.kt
 package com.example.registroderiscos.viewmodel
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.registroderiscos.data.model.Risk
@@ -18,18 +22,25 @@ class RiskViewModel(private val repository: FirebaseRepository = FirebaseReposit
     private val _uiState = MutableStateFlow(RiskUiState())
     val uiState: StateFlow<RiskUiState> = _uiState
 
-    fun registerRisk(description: String) {
+    var currentAddress by mutableStateOf("")
+        public set
+
+    fun registerRisk(description: String, address: String?) {
         viewModelScope.launch {
-            val risk = Risk(description = description) // Crie a classe Risk no seu model
+            val risk = Risk(description = description, address = address)
             val result = repository.addRisk(risk)
             _uiState.update {
                 if (result.isSuccess) {
                     it.copy(registrationMessage = "Registro salvo com sucesso", isRegistrationSuccessful = true)
                 } else {
-                    it.copy(registrationMessage = result.exceptionOrNull()?.message ?: "Falha ao registrar risco. Tente novamente", isRegistrationSuccessful = false)
+                    it.copy(
+                        registrationMessage = result.exceptionOrNull()?.message
+                            ?: "Falha ao registrar risco. Tente novamente",
+                        isRegistrationSuccessful = false
+                    )
                 }
             }
-
+            // Limpar a mensagem após um tempo
             kotlinx.coroutines.delay(3000)
             _uiState.update { it.copy(registrationMessage = "") }
         }
