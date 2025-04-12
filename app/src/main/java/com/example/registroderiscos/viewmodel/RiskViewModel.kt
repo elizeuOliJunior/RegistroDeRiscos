@@ -25,9 +25,9 @@ class RiskViewModel(private val repository: FirebaseRepository = FirebaseReposit
     var currentAddress by mutableStateOf("")
         public set
 
-    fun registerRisk(description: String, address: String?) {
+    fun registerRisk(description: String, address: String?, riskType: String?) {
         viewModelScope.launch {
-            val risk = Risk(description = description, address = address)
+            val risk = Risk(description = description, address = address, riskType = riskType)
             val result = repository.addRisk(risk)
             _uiState.update {
                 if (result.isSuccess) {
@@ -40,7 +40,6 @@ class RiskViewModel(private val repository: FirebaseRepository = FirebaseReposit
                     )
                 }
             }
-            // Limpar a mensagem após um tempo
             kotlinx.coroutines.delay(3000)
             _uiState.update { it.copy(registrationMessage = "") }
         }

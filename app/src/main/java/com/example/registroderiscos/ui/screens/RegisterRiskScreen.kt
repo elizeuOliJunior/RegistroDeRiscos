@@ -1,4 +1,3 @@
-// ui/screens/RegisterRiskScreen.kt
 package com.example.registroderiscos.ui.screens
 
 import android.Manifest
@@ -19,10 +18,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.registroderiscos.data.model.RiskType
 import com.example.registroderiscos.viewmodel.RiskViewModel
 import com.google.android.gms.location.LocationServices
 import java.util.Locale
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterRiskScreen() {
     val viewModel: RiskViewModel = viewModel()
@@ -68,15 +71,45 @@ fun RegisterRiskScreen() {
         }
     }
 
+    var expanded by remember { mutableStateOf(false) }
+    var selectedRiskType by remember { mutableStateOf<RiskType?>(null) }
+    val riskTypes = RiskType.getAllTypes()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
     ) {
         Text("Registrar Novo Risco", style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = selectedRiskType?.displayName ?: "",
+            onValueChange = { /* Não permite edição direta */ },
+            label = { Text("Qual seria o tipo de risco?") },
+            readOnly = true,
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
+            modifier = Modifier.fillMaxWidth(),
+            onFocus = { expanded = true }
+        )
+        ExposedDropdownMenuDefaults(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            riskTypes.forEach { riskType ->
+                DropdownMenuItem(
+                    text = { Text(riskType.displayName) },
+                    onClick = {
+                        selectedRiskType = riskType
+                        expanded = false
+                    }
+                )
+            }
+        }
 
         OutlinedTextField(
             value = description,
@@ -84,21 +117,20 @@ fun RegisterRiskScreen() {
             label = { Text("Descrição do Risco") },
             modifier = Modifier.fillMaxWidth()
         )
-        Spacer(modifier = Modifier.height(16.dp))
 
-//        if (viewModel.currentAddress.isNotEmpty()) {
-//            Text("Localização: ${viewModel.currentAddress}", style = MaterialTheme.typography.bodyMedium)
-//            Spacer(modifier = Modifier.height(8.dp))
-//        }
+        if (viewModel.currentAddress.isNotEmpty()) {
+            Text("Localização: ${viewModel.currentAddress}", style = MaterialTheme.typography.bodyMedium)
+        }
 
         Button(
             onClick = {
                 if (hasLocationPermission) {
-                    viewModel.registerRisk(description, viewModel.currentAddress)
+                    viewModel.registerRisk(description, viewModel.currentAddress, selectedRiskType?.displayName)
                 } else {
                     Toast.makeText(context, "Permissão de localização não concedida.", Toast.LENGTH_SHORT).show()
                 }
-            }
+            },
+            enabled = selectedRiskType != null && description.isNotBlank()
         ) {
             Text("Registrar Risco")
         }

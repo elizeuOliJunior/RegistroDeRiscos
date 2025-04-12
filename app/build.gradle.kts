@@ -62,4 +62,5 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx:22.+")
     implementation("com.google.firebase:firebase-firestore-ktx:24.+")
     implementation("com.google.firebase:firebase-storage-ktx:20.+")
+    implementation("androidx.compose.material3:material3:1.2.0")
 }

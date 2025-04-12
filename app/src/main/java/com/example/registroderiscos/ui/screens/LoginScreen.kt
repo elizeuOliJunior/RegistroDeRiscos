@@ -1,4 +1,3 @@
-// ui/screens/LoginScreen.kt
 package com.example.registroderiscos.ui.screens
 
 import androidx.compose.foundation.layout.*
@@ -59,7 +58,6 @@ fun LoginScreen(navController: NavHostController = rememberNavController()) {
             Text(loginResult, color = MaterialTheme.colorScheme.error)
         }
 
-        // Observe o estado de autenticação e navegue para a HomeScreen
         LaunchedEffect(viewModel.isAuthenticated) {
             if (viewModel.isAuthenticated) {
                 navController.navigate("HomeScreen") {
