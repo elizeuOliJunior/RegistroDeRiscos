@@ -24,7 +24,6 @@ import com.google.android.gms.location.LocationServices
 import java.util.Locale
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterRiskScreen() {
@@ -85,29 +84,33 @@ fun RegisterRiskScreen() {
         Text("Registrar Novo Risco", style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedTextField(
-            value = selectedRiskType?.displayName ?: "",
-            onValueChange = { /* Não permite edição direta */ },
-            label = { Text("Qual seria o tipo de risco?") },
-            readOnly = true,
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-            },
-            modifier = Modifier.fillMaxWidth(),
-            onFocus = { expanded = true }
-        )
-        ExposedDropdownMenuDefaults(
+        ExposedDropdownMenuBox(
             expanded = expanded,
-            onDismissRequest = { expanded = false }
+            onExpandedChange = { expanded = !expanded }
         ) {
-            riskTypes.forEach { riskType ->
-                DropdownMenuItem(
-                    text = { Text(riskType.displayName) },
-                    onClick = {
-                        selectedRiskType = riskType
-                        expanded = false
-                    }
-                )
+            OutlinedTextField(
+                value = selectedRiskType?.displayName ?: "",
+                onValueChange = { /* Não permite edição direta */ },
+                label = { Text("Qual seria o tipo de risco?") },
+                readOnly = true,
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                riskTypes.forEach { riskType ->
+                    DropdownMenuItem(
+                        text = { Text(riskType.displayName) },
+                        onClick = {
+                            selectedRiskType = riskType
+                            expanded = false
+                        }
+                    )
+                }
             }
         }
 
