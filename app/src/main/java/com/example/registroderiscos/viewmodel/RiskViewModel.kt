@@ -1,4 +1,3 @@
-// viewmodel/RiskViewModel.kt
 package com.example.registroderiscos.viewmodel
 
 import androidx.compose.runtime.getValue
@@ -7,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.registroderiscos.data.model.Risk
+import com.example.registroderiscos.data.model.RiskType
 import com.example.registroderiscos.repository.FirebaseRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,15 +19,31 @@ data class RiskUiState(
 )
 
 class RiskViewModel(private val repository: FirebaseRepository = FirebaseRepository()) : ViewModel() {
+
     private val _uiState = MutableStateFlow(RiskUiState())
     val uiState: StateFlow<RiskUiState> = _uiState
 
     var currentAddress by mutableStateOf("")
-        public set
+        private set
 
-    fun registerRisk(description: String, address: String?, riskType: String?) {
+    var selectedRiskType by mutableStateOf<RiskType?>(null)
+        private set
+
+    fun updateSelectedRiskType(riskType: RiskType) {
+        selectedRiskType = riskType
+    }
+
+    fun updateAddress(address: String) {
+        currentAddress = address
+    }
+
+    fun registerRisk(description: String) {
         viewModelScope.launch {
-            val risk = Risk(description = description, address = address, riskType = riskType)
+            val risk = Risk(
+                description = description,
+                address = currentAddress,
+                riskType = selectedRiskType?.displayName
+            )
             val result = repository.addRisk(risk)
             _uiState.update {
                 if (result.isSuccess) {

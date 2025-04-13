@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Geocoder
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -18,19 +17,25 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.registroderiscos.data.model.RiskType
 import com.example.registroderiscos.viewmodel.RiskViewModel
 import com.google.android.gms.location.LocationServices
 import java.util.Locale
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import com.example.registroderiscos.data.model.RiskType
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterRiskScreen() {
     val viewModel: RiskViewModel = viewModel()
-    var description by remember { mutableStateOf("") }
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+
+    var description by remember { mutableStateOf("") }
+
+    var expanded by remember { mutableStateOf(false) }
+    val selectedRiskType = viewModel.selectedRiskType
+    val riskTypes = RiskType.getAllTypes()
 
     var hasLocationPermission by remember {
         mutableStateOf(
@@ -47,7 +52,7 @@ fun RegisterRiskScreen() {
             hasLocationPermission = permissions.all { it.value }
             if (hasLocationPermission) {
                 getLocationWithAddress(context) { address ->
-                    viewModel.currentAddress = address
+                    viewModel.updateAddress(address)
                 }
             } else {
                 Toast.makeText(context, "Permissão de localização não concedida.", Toast.LENGTH_SHORT).show()
@@ -55,7 +60,7 @@ fun RegisterRiskScreen() {
         }
     )
 
-    LaunchedEffect(key1 = Unit) {
+    LaunchedEffect(Unit) {
         if (!hasLocationPermission) {
             locationPermissionLauncher.launch(
                 arrayOf(
@@ -65,14 +70,10 @@ fun RegisterRiskScreen() {
             )
         } else {
             getLocationWithAddress(context) { address ->
-                viewModel.currentAddress = address
+                viewModel.updateAddress(address)
             }
         }
     }
-
-    var expanded by remember { mutableStateOf(false) }
-    var selectedRiskType by remember { mutableStateOf<RiskType?>(null) }
-    val riskTypes = RiskType.getAllTypes()
 
     Column(
         modifier = Modifier
@@ -82,7 +83,6 @@ fun RegisterRiskScreen() {
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
     ) {
         Text("Registrar Novo Risco", style = MaterialTheme.typography.headlineMedium)
-        Spacer(modifier = Modifier.height(16.dp))
 
         ExposedDropdownMenuBox(
             expanded = expanded,
@@ -90,14 +90,13 @@ fun RegisterRiskScreen() {
         ) {
             OutlinedTextField(
                 value = selectedRiskType?.displayName ?: "",
-                onValueChange = { /* Não permite edição direta */ },
-                label = { Text("Qual seria o tipo de risco?") },
+                onValueChange = {},
+                label = { Text("Tipo de Risco") },
                 readOnly = true,
-                trailingIcon = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-                },
-                modifier = Modifier.fillMaxWidth()
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+                modifier = Modifier.fillMaxWidth().menuAnchor()
             )
+
             ExposedDropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
@@ -106,7 +105,7 @@ fun RegisterRiskScreen() {
                     DropdownMenuItem(
                         text = { Text(riskType.displayName) },
                         onClick = {
-                            selectedRiskType = riskType
+                            viewModel.updateSelectedRiskType(riskType)
                             expanded = false
                         }
                     )
@@ -121,14 +120,14 @@ fun RegisterRiskScreen() {
             modifier = Modifier.fillMaxWidth()
         )
 
-        if (viewModel.currentAddress.isNotEmpty()) {
-            Text("Localização: ${viewModel.currentAddress}", style = MaterialTheme.typography.bodyMedium)
-        }
+//        if (viewModel.currentAddress.isNotEmpty()) {
+//            Text("Localização: ${viewModel.currentAddress}")
+//        }
 
         Button(
             onClick = {
                 if (hasLocationPermission) {
-                    viewModel.registerRisk(description, viewModel.currentAddress, selectedRiskType?.displayName)
+                    viewModel.registerRisk(description)
                 } else {
                     Toast.makeText(context, "Permissão de localização não concedida.", Toast.LENGTH_SHORT).show()
                 }
@@ -138,8 +137,6 @@ fun RegisterRiskScreen() {
             Text("Registrar Risco")
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
         if (uiState.registrationMessage.isNotEmpty()) {
             Text(
                 uiState.registrationMessage,
@@ -148,7 +145,6 @@ fun RegisterRiskScreen() {
         }
     }
 }
-
 @SuppressLint("MissingPermission")
 fun getLocationWithAddress(context: Context, onAddressResult: (String) -> Unit) {
     val fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
@@ -157,24 +153,22 @@ fun getLocationWithAddress(context: Context, onAddressResult: (String) -> Unit) 
             val geocoder = Geocoder(context, Locale.getDefault())
             try {
                 val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
-                if (addresses != null && addresses.isNotEmpty()) {
+                if (!addresses.isNullOrEmpty()) {
                     val address = addresses[0]
-                    val fullAddress = with(address) {
-                        (0..maxAddressLineIndex).joinToString(separator = ", ") { getAddressLine(it) }
+                    val fullAddress = (0..address.maxAddressLineIndex).joinToString(", ") { index ->
+                        address.getAddressLine(index)
                     }
-                    Log.d("LocationDebug", "Address found: $fullAddress")
                     onAddressResult(fullAddress)
                 } else {
-                    Log.d("LocationDebug", "No address found for the location")
-                    onAddressResult("") // Or handle the error as needed
+                    onAddressResult("")
                 }
             } catch (e: Exception) {
-                Log.e("LocationDebug", "Error getting address: ${e.localizedMessage}")
-                onAddressResult("") // Or handle the error as needed
+                onAddressResult("")
             }
         } else {
-            Log.d("LocationDebug", "Last known location was null")
-            onAddressResult("") // Or handle the error as needed
+            onAddressResult("")
         }
+    }.addOnFailureListener {
+        onAddressResult("")
     }
 }
