@@ -7,6 +7,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.flow.update
+
+
 data class AuthUiState(
     val emailError: String = "",
     val passwordError: String = "",
@@ -49,4 +55,29 @@ class AuthViewModel : ViewModel() {
                 }
         }
     }
+
+    fun register(email: String, password: String) {
+        if (email.isBlank()) {
+            _uiState.update { it.copy(emailError = "Preencha o e-mail") }
+            return
+        }
+        if (password.isBlank()) {
+            _uiState.update { it.copy(passwordError = "Preencha a senha") }
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                auth.createUserWithEmailAndPassword(email, password).await()
+                _uiState.update { it.copy(isLoggedIn = true, generalError = "", emailError = "", passwordError = "") }
+            } catch (e: FirebaseAuthUserCollisionException) {
+                _uiState.update { it.copy(generalError = "E-mail já cadastrado") }
+            } catch (e: FirebaseAuthWeakPasswordException) {
+                _uiState.update { it.copy(generalError = "Senha fraca (mínimo 6 caracteres)") }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(generalError = "Erro ao cadastrar: ${e.message}") }
+            }
+        }
+    }
+
 }

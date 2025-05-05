@@ -11,7 +11,7 @@ import androidx.navigation.NavController
 import com.example.registroderiscos.viewmodel.AuthViewModel
 
 @Composable
-fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewModel()) {
+fun RegisterScreen(navController: NavController, viewModel: AuthViewModel = viewModel()) {
     val uiState by viewModel.uiState.collectAsState()
 
     var email by remember { mutableStateOf("") }
@@ -20,7 +20,7 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
     LaunchedEffect(uiState.isLoggedIn) {
         if (uiState.isLoggedIn) {
             navController.navigate("HomeScreen") {
-                popUpTo("LoginScreen") { inclusive = true }
+                popUpTo("RegisterScreen") { inclusive = true }
             }
         }
     }
@@ -32,7 +32,7 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Login", style = MaterialTheme.typography.headlineMedium)
+        Text("Cadastro", style = MaterialTheme.typography.headlineMedium)
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -63,18 +63,11 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { viewModel.login(email, password) },
+            onClick = { viewModel.register(email, password) },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Entrar")
+            Text("Cadastrar")
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        TextButton(onClick = { navController.navigate("RegisterScreen") }) {
-            Text("Não tem conta? Cadastre-se")
-        }
-
 
         if (uiState.generalError.isNotEmpty()) {
             Spacer(modifier = Modifier.height(16.dp))
