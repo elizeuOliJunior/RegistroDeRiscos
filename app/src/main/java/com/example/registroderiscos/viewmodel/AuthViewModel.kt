@@ -12,6 +12,9 @@ import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.flow.update
 
+import com.example.registroderiscos.data.model.User
+import com.google.firebase.firestore.FirebaseFirestore
+
 
 data class AuthUiState(
     val emailError: String = "",
@@ -56,7 +59,7 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    fun register(email: String, password: String) {
+    fun register(name: String, cpf: String, phone: String, email: String, password: String) {
         if (email.isBlank()) {
             _uiState.update { it.copy(emailError = "Preencha o e-mail") }
             return
@@ -68,7 +71,23 @@ class AuthViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
-                auth.createUserWithEmailAndPassword(email, password).await()
+                val result = auth.createUserWithEmailAndPassword(email, password).await()
+                val userId = result.user?.uid ?: return@launch
+
+                val user = User(
+                    id = userId,
+                    name = name,
+                    cpf = cpf,
+                    phone = phone,
+                    email = email
+                )
+
+                FirebaseFirestore.getInstance()
+                    .collection("users")
+                    .document(userId)
+                    .set(user)
+                    .await()
+
                 _uiState.update { it.copy(isLoggedIn = true, generalError = "", emailError = "", passwordError = "") }
             } catch (e: FirebaseAuthUserCollisionException) {
                 _uiState.update { it.copy(generalError = "E-mail já cadastrado") }

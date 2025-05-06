@@ -14,6 +14,9 @@ import com.example.registroderiscos.viewmodel.AuthViewModel
 fun RegisterScreen(navController: NavController, viewModel: AuthViewModel = viewModel()) {
     val uiState by viewModel.uiState.collectAsState()
 
+    var name by remember { mutableStateOf("") }
+    var cpf by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -35,6 +38,30 @@ fun RegisterScreen(navController: NavController, viewModel: AuthViewModel = view
         Text("Cadastro", style = MaterialTheme.typography.headlineMedium)
 
         Spacer(modifier = Modifier.height(24.dp))
+
+        OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("Nome") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = cpf,
+            onValueChange = { cpf = it },
+            label = { Text("CPF") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = phone,
+            onValueChange = { phone = it },
+            label = { Text("Telefone") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
             value = email,
@@ -63,7 +90,9 @@ fun RegisterScreen(navController: NavController, viewModel: AuthViewModel = view
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { viewModel.register(email, password) },
+            onClick = {
+                viewModel.registerWithDetails(name, cpf, phone, email, password)
+            },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Cadastrar")
