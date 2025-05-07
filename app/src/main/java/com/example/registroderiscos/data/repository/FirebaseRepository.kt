@@ -27,7 +27,8 @@ class FirebaseRepository {
             val riskMap = hashMapOf(
                 "description" to risk.description,
                 "address" to risk.address,
-                "riskType" to risk.riskType
+                "riskType" to risk.riskType,
+                "userId" to risk.userId
             )
             risksCollection.add(riskMap).await()
             Result.success(Unit)

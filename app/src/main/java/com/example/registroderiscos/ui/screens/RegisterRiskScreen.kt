@@ -22,7 +22,7 @@ import com.google.android.gms.location.LocationServices
 import java.util.Locale
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import com.example.registroderiscos.data.model.RiskType
-
+import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -94,7 +94,9 @@ fun RegisterRiskScreen() {
                 label = { Text("Tipo de Risco") },
                 readOnly = true,
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-                modifier = Modifier.fillMaxWidth().menuAnchor()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor()
             )
 
             ExposedDropdownMenu(
@@ -120,10 +122,6 @@ fun RegisterRiskScreen() {
             modifier = Modifier.fillMaxWidth()
         )
 
-//        if (viewModel.currentAddress.isNotEmpty()) {
-//            Text("Localização: ${viewModel.currentAddress}")
-//        }
-
         Button(
             onClick = {
                 if (hasLocationPermission) {
@@ -145,6 +143,7 @@ fun RegisterRiskScreen() {
         }
     }
 }
+
 @SuppressLint("MissingPermission")
 fun getLocationWithAddress(context: Context, onAddressResult: (String) -> Unit) {
     val fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
