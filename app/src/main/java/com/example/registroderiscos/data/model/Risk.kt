@@ -6,5 +6,7 @@ data class Risk(
     val address: String? = null,
     val riskType: String? = null,
     val imageUrl: String? = null,
-    val userId: String? = ""
+    val userId: String? = "",
+    val date: String? = null,
+    val Status: String? = null
 )
