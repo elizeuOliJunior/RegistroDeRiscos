@@ -1,4 +1,3 @@
-// ui/screens/TesteDropdownScreen.kt
 package com.example.registroderiscos.ui.screens
 
 import androidx.compose.foundation.layout.*

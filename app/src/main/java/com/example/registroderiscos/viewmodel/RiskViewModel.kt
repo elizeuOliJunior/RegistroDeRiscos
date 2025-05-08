@@ -1,5 +1,6 @@
 package com.example.registroderiscos.viewmodel
 
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -19,7 +20,9 @@ data class RiskUiState(
     val isRegistrationSuccessful: Boolean = false
 )
 
-class RiskViewModel(private val repository: FirebaseRepository = FirebaseRepository()) : ViewModel() {
+class RiskViewModel(
+    private val repository: FirebaseRepository = FirebaseRepository()
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RiskUiState())
     val uiState: StateFlow<RiskUiState> = _uiState
@@ -30,6 +33,9 @@ class RiskViewModel(private val repository: FirebaseRepository = FirebaseReposit
     var selectedRiskType by mutableStateOf<RiskType?>(null)
         private set
 
+    var selectedImageUri by mutableStateOf<Uri?>(null)
+        private set
+
     fun updateSelectedRiskType(riskType: RiskType) {
         selectedRiskType = riskType
     }
@@ -38,26 +44,54 @@ class RiskViewModel(private val repository: FirebaseRepository = FirebaseReposit
         currentAddress = address
     }
 
+    fun updateSelectedImage(uri: Uri?) {
+        selectedImageUri = uri
+    }
+
     fun registerRisk(description: String) {
         viewModelScope.launch {
-            val risk = Risk(
-                description = description,
-                address = currentAddress,
-                riskType = selectedRiskType?.displayName,
-                userId = FirebaseAuth.getInstance().currentUser?.uid
-            )
-            val result = repository.addRisk(risk)
-            _uiState.update {
-                if (result.isSuccess) {
-                    it.copy(registrationMessage = "Registro salvo com sucesso", isRegistrationSuccessful = true)
-                } else {
+            _uiState.update { it.copy(registrationMessage = "Salvando risco...", isRegistrationSuccessful = false) }
+
+            try {
+                var imageUrl: String? = null
+
+                selectedImageUri?.let { uri ->
+                    imageUrl = repository.uploadImageToStorage(uri)
+                }
+
+                val risk = Risk(
+                    description = description,
+                    address = currentAddress,
+                    riskType = selectedRiskType?.displayName,
+                    userId = FirebaseAuth.getInstance().currentUser?.uid,
+                    imageUrl = imageUrl
+                )
+
+                val result = repository.addRisk(risk)
+
+                _uiState.update {
+                    if (result.isSuccess) {
+                        it.copy(
+                            registrationMessage = "Registro salvo com sucesso",
+                            isRegistrationSuccessful = true
+                        )
+                    } else {
+                        it.copy(
+                            registrationMessage = result.exceptionOrNull()?.message
+                                ?: "Falha ao registrar risco. Tente novamente",
+                            isRegistrationSuccessful = false
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.update {
                     it.copy(
-                        registrationMessage = result.exceptionOrNull()?.message
-                            ?: "Falha ao registrar risco. Tente novamente",
+                        registrationMessage = "Erro ao registrar risco: ${e.message}",
                         isRegistrationSuccessful = false
                     )
                 }
             }
+
             kotlinx.coroutines.delay(3000)
             _uiState.update { it.copy(registrationMessage = "") }
         }

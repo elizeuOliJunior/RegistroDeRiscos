@@ -1,14 +1,19 @@
 package com.example.registroderiscos.ui.screens
 
+import coil.compose.rememberAsyncImagePainter
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.location.Geocoder
+import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.launch
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,6 +27,16 @@ import com.google.android.gms.location.LocationServices
 import java.util.Locale
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import com.example.registroderiscos.data.model.RiskType
+import java.io.File
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.ui.draw.clip
+import androidx.compose.material3.Icon
+import androidx.core.content.FileProvider
+import java.util.UUID
+
 import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,6 +47,9 @@ fun RegisterRiskScreen() {
     val context = LocalContext.current
 
     var description by remember { mutableStateOf("") }
+
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+
 
     var expanded by remember { mutableStateOf(false) }
     val selectedRiskType = viewModel.selectedRiskType
@@ -45,6 +63,19 @@ fun RegisterRiskScreen() {
             ) == PackageManager.PERMISSION_GRANTED
         )
     }
+
+    val photoUri = remember { createImageUri(context) }
+
+    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success) {
+            selectedImageUri = photoUri
+        }
+    }
+
+    val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let { selectedImageUri = it }
+    }
+
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
@@ -122,9 +153,30 @@ fun RegisterRiskScreen() {
             modifier = Modifier.fillMaxWidth()
         )
 
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+
+            Button(onClick = { galleryLauncher.launch("image/*") }) {
+                Icon(Icons.Default.Image, contentDescription = "Selecionar da Galeria")
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Galeria")
+            }
+        }
+
+
+        selectedImageUri?.let { uri ->
+            Image(
+                painter = rememberAsyncImagePainter(uri),
+                contentDescription = "Imagem Selecionada",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(8.dp))
+            )
+        }
         Button(
             onClick = {
                 if (hasLocationPermission) {
+                    viewModel.updateSelectedImage(selectedImageUri)
                     viewModel.registerRisk(description)
                 } else {
                     Toast.makeText(context, "Permissão de localização não concedida.", Toast.LENGTH_SHORT).show()
@@ -142,6 +194,24 @@ fun RegisterRiskScreen() {
             )
         }
     }
+}
+
+fun createImageUri(context: Context): Uri {
+    val file = File(context.cacheDir, "captured_image_${System.currentTimeMillis()}.jpg")
+    return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+}
+
+fun saveBitmapToCache(context: Context, bitmap: Bitmap): Uri {
+    val file = File(context.cacheDir, "captured_image_${UUID.randomUUID()}.png")
+    file.outputStream().use {
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+    }
+
+    return FileProvider.getUriForFile(
+        context,
+        "${context.packageName}.fileprovider",
+        file
+    )
 }
 
 @SuppressLint("MissingPermission")
