@@ -9,18 +9,56 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.registroderiscos.viewmodel.AuthViewModel
+import android.Manifest
+import android.content.pm.PackageManager
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
+
 
 @Composable
 fun RegisterScreen(navController: NavController, viewModel: AuthViewModel = viewModel()) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
+    var name by remember { mutableStateOf("") }
+    var cpf by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    LaunchedEffect(uiState.isLoggedIn) {
-        if (uiState.isLoggedIn) {
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+        onResult = { permissions ->
+            val granted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
+            if (granted) {
+                Toast.makeText(context, "Localização ativada!", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "Permissão de localização negada.", Toast.LENGTH_SHORT).show()
+            }
             navController.navigate("HomeScreen") {
                 popUpTo("RegisterScreen") { inclusive = true }
+            }
+        }
+    )
+
+    LaunchedEffect(uiState.isLoggedIn) {
+        if (uiState.isLoggedIn) {
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                locationPermissionLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    )
+                )
+            } else {
+                navController.navigate("HomeScreen") {
+                    popUpTo("RegisterScreen") { inclusive = true }
+                }
             }
         }
     }
@@ -35,6 +73,30 @@ fun RegisterScreen(navController: NavController, viewModel: AuthViewModel = view
         Text("Cadastro", style = MaterialTheme.typography.headlineMedium)
 
         Spacer(modifier = Modifier.height(24.dp))
+
+        OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("Nome") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = cpf,
+            onValueChange = { cpf = it },
+            label = { Text("CPF") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = phone,
+            onValueChange = { phone = it },
+            label = { Text("Telefone") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
             value = email,
@@ -63,7 +125,9 @@ fun RegisterScreen(navController: NavController, viewModel: AuthViewModel = view
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { viewModel.register(email, password) },
+            onClick = {
+                viewModel.register(name, cpf, phone, email, password)
+            },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Cadastrar")
