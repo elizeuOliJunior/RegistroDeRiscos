@@ -11,7 +11,6 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.launch
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.*
@@ -36,6 +35,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.material3.Icon
 import androidx.core.content.FileProvider
 import java.util.UUID
+
+import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -123,7 +124,9 @@ fun RegisterRiskScreen() {
                 label = { Text("Tipo de Risco") },
                 readOnly = true,
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-                modifier = Modifier.fillMaxWidth().menuAnchor()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor()
             )
 
             ExposedDropdownMenu(
@@ -169,9 +172,6 @@ fun RegisterRiskScreen() {
                     .clip(RoundedCornerShape(8.dp))
             )
         }
-
-
-
         Button(
             onClick = {
                 if (hasLocationPermission) {
