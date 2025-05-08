@@ -59,13 +59,13 @@ fun HomeScreen(navController: NavHostController = rememberNavController()) {
         }
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = { /* Lógica para sair do aplicativo ou deslogar */ },
-            modifier = Modifier.fillMaxWidth(0.8f),
-            colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
-            shape = RoundedCornerShape(8.dp)
-        ) {
-            Text("Sair", color = Color.White)
-        }
+//        Button(
+//            onClick = { /* Lógica para sair do aplicativo ou deslogar */ },
+//            modifier = Modifier.fillMaxWidth(0.8f),
+//            colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
+//            shape = RoundedCornerShape(8.dp)
+//        ) {
+//            Text("Sair", color = Color.White)
+//        }
     }
 }

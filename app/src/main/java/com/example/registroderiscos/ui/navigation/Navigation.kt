@@ -7,6 +7,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.registroderiscos.ui.screens.HomeScreen
 import com.example.registroderiscos.ui.screens.LoginScreen
 import com.example.registroderiscos.ui.screens.RegisterRiskScreen
+import com.example.registroderiscos.ui.screens.RegisterScreen
 
 @Composable
 fun AppNavigation() {
@@ -21,5 +22,9 @@ fun AppNavigation() {
         composable("RegisterRiskScreen") {
             RegisterRiskScreen()
         }
+        composable("RegisterScreen") {
+            RegisterScreen(navController = navController)
+        }
+
     }
 }

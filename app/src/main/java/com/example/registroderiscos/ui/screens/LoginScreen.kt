@@ -69,6 +69,13 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
             Text("Entrar")
         }
 
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TextButton(onClick = { navController.navigate("RegisterScreen") }) {
+            Text("Não tem conta? Cadastre-se")
+        }
+
+
         if (uiState.generalError.isNotEmpty()) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(uiState.generalError, color = MaterialTheme.colorScheme.error)
