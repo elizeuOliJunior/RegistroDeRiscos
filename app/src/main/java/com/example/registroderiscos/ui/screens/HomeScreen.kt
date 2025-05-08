@@ -50,7 +50,7 @@ fun HomeScreen(navController: NavHostController = rememberNavController()) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { /* Navegar para a tela de visualização de registros */ },
+            onClick = {navController.navigate("UserRisksScreen") },
             modifier = Modifier.fillMaxWidth(0.8f),
             colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
             shape = RoundedCornerShape(8.dp)

@@ -8,6 +8,7 @@ import com.example.registroderiscos.ui.screens.HomeScreen
 import com.example.registroderiscos.ui.screens.LoginScreen
 import com.example.registroderiscos.ui.screens.RegisterRiskScreen
 import com.example.registroderiscos.ui.screens.RegisterScreen
+import com.example.registroderiscos.ui.screens.UserRisksScreen
 
 @Composable
 fun AppNavigation() {
@@ -24,6 +25,9 @@ fun AppNavigation() {
         }
         composable("RegisterScreen") {
             RegisterScreen(navController = navController)
+        }
+        composable("UserRisksScreen") {
+            UserRisksScreen(navController = navController)
         }
 
     }
