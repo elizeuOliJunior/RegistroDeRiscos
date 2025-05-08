@@ -37,6 +37,8 @@ import androidx.compose.material3.Icon
 import androidx.core.content.FileProvider
 import java.util.UUID
 
+import com.google.firebase.auth.FirebaseAuth
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterRiskScreen() {
@@ -123,7 +125,9 @@ fun RegisterRiskScreen() {
                 label = { Text("Tipo de Risco") },
                 readOnly = true,
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-                modifier = Modifier.fillMaxWidth().menuAnchor()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor()
             )
 
             ExposedDropdownMenu(
@@ -169,9 +173,6 @@ fun RegisterRiskScreen() {
                     .clip(RoundedCornerShape(8.dp))
             )
         }
-
-
-
         Button(
             onClick = {
                 if (hasLocationPermission) {

@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.registroderiscos.data.model.Risk
 import com.example.registroderiscos.data.model.RiskType
 import com.example.registroderiscos.repository.FirebaseRepository
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -62,6 +63,7 @@ class RiskViewModel(
                     description = description,
                     address = currentAddress,
                     riskType = selectedRiskType?.displayName,
+                    userId = FirebaseAuth.getInstance().currentUser?.uid,
                     imageUrl = imageUrl
                 )
 
