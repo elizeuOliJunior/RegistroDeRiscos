@@ -25,9 +25,7 @@ data class RiskUiState(
     val isRegistrationSuccessful: Boolean = false
 )
 
-class RiskViewModel(
-    private val repository: FirebaseRepository = FirebaseRepository()
-) : ViewModel() {
+class RiskViewModel(private val repository: FirebaseRepository = FirebaseRepository()) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RiskUiState())
     val uiState: StateFlow<RiskUiState> = _uiState

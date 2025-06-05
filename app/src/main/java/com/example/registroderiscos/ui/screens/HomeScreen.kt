@@ -18,7 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 
 @Composable
 fun HomeScreen(navController: NavHostController = rememberNavController()) {
-    val primaryColor = MaterialTheme.colorScheme.primary // Ou uma cor verde personalizada do seu tema
+    val primaryColor = MaterialTheme.colorScheme.primary
 
     Column(
         modifier = Modifier
