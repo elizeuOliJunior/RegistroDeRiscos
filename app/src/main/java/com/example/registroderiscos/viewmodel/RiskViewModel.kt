@@ -72,7 +72,7 @@ class RiskViewModel(
                     userId = FirebaseAuth.getInstance().currentUser?.uid,
                     imageUrl = imageUrl,
                     date = LocalDate.now().toString(),
-                    Status = "Analise"
+                    status = "Analise"
                 )
 
                 val result = repository.addRisk(risk)

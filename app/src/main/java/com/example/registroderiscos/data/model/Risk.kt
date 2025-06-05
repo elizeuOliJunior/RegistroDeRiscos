@@ -8,5 +8,5 @@ data class Risk(
     val imageUrl: String? = null,
     val userId: String? = "",
     val date: String? = null,
-    val Status: String? = null
+    val status: String? = null
 )

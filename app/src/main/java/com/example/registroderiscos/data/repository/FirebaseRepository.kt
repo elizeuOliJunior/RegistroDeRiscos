@@ -46,7 +46,7 @@ class FirebaseRepository {
                 "imageUrl" to risk.imageUrl,
                 "userId" to risk.userId,
                 "date" to risk.date,
-                "Status" to risk.Status
+                "status" to risk.status
             )
             risksCollection.add(riskMap).await()
             Result.success(Unit)
