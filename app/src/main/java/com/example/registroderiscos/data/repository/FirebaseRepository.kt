@@ -39,6 +39,8 @@ class FirebaseRepository {
 
     suspend fun addRisk(risk: Risk): Result<Unit> {
         return try {
+            require(risk.userId.isNotBlank()) { "Usuário não autenticado." }
+
             val riskMap = hashMapOf(
                 "description" to risk.description,
                 "address" to risk.address,

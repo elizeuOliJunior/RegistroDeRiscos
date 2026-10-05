@@ -181,9 +181,9 @@ fun RegisterRiskScreen() {
                     Toast.makeText(context, "Permissão de localização não concedida.", Toast.LENGTH_SHORT).show()
                 }
             },
-            enabled = selectedRiskType != null && description.isNotBlank()
+            enabled = selectedRiskType != null && description.isNotBlank() && !uiState.isSubmitting
         ) {
-            Text("Registrar Risco")
+            Text(if (uiState.isSubmitting) "Registrando..." else "Registrar Risco")
         }
 
         if (uiState.registrationMessage.isNotEmpty()) {

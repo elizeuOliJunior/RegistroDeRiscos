@@ -1,9 +1,6 @@
 package com.example.registroderiscos.viewmodel
 
 import android.net.Uri
-import android.os.Build
-import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -13,17 +10,27 @@ import com.example.registroderiscos.data.model.Risk
 import com.example.registroderiscos.data.model.RiskType
 import com.example.registroderiscos.repository.FirebaseRepository
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
+import java.util.Calendar
+import java.util.Locale
 
 data class RiskUiState(
     val registrationMessage: String = "",
-    val isRegistrationSuccessful: Boolean = false
+    val isRegistrationSuccessful: Boolean = false,
+    val isSubmitting: Boolean = false
 )
+
+internal fun formatRiskDate(calendar: Calendar = Calendar.getInstance()): String =
+    String.format(
+        Locale.ROOT,
+        "%04d-%02d-%02d",
+        calendar.get(Calendar.YEAR),
+        calendar.get(Calendar.MONTH) + 1,
+        calendar.get(Calendar.DAY_OF_MONTH)
+    )
 
 class RiskViewModel(
     private val repository: FirebaseRepository = FirebaseRepository()
@@ -53,12 +60,30 @@ class RiskViewModel(
         selectedImageUri = uri
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun registerRisk(description: String) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(registrationMessage = "Salvando risco...", isRegistrationSuccessful = false) }
+        if (_uiState.value.isSubmitting) return
 
+        _uiState.update {
+            it.copy(
+                registrationMessage = "Salvando risco...",
+                isRegistrationSuccessful = false,
+                isSubmitting = true
+            )
+        }
+
+        viewModelScope.launch {
             try {
+                val userId = FirebaseAuth.getInstance().currentUser?.uid
+                if (userId == null) {
+                    _uiState.update {
+                        it.copy(
+                            registrationMessage = "Sessão expirada. Faça login novamente.",
+                            isRegistrationSuccessful = false
+                        )
+                    }
+                    return@launch
+                }
+
                 var imageUrl: String? = null
 
                 selectedImageUri?.let { uri ->
@@ -69,9 +94,9 @@ class RiskViewModel(
                     description = description,
                     address = currentAddress,
                     riskType = selectedRiskType?.displayName,
-                    userId = FirebaseAuth.getInstance().currentUser?.uid,
+                    userId = userId,
                     imageUrl = imageUrl,
-                    date = LocalDate.now().toString(),
+                    date = formatRiskDate(),
                     Status = "Analise"
                 )
 
@@ -98,10 +123,15 @@ class RiskViewModel(
                         isRegistrationSuccessful = false
                     )
                 }
+            } finally {
+                kotlinx.coroutines.delay(3000)
+                _uiState.update {
+                    it.copy(
+                        registrationMessage = "",
+                        isSubmitting = false
+                    )
+                }
             }
-
-            kotlinx.coroutines.delay(3000)
-            _uiState.update { it.copy(registrationMessage = "") }
         }
     }
 }
